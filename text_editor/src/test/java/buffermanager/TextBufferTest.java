@@ -5,15 +5,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TextBufferTest {
+
 
     TextBuffer textBuffer;
     private String HELLO= "hello";
@@ -116,6 +114,5 @@ public class TextBufferTest {
             fail();
         }
     }
-
 
 }

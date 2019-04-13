@@ -8,13 +8,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * The type Text buffer.
+ */
 public class TextBuffer implements TextBufferInterface {
 
+    /**
+     * The size of the Text Buffer
+     */
     private static final int BUFFER_SIZE = 5;
+    /**
+     * Logger to log any error, info
+     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The list of the states of the text buffer
+     */
     private List<StringBuilder> states;
+    /**
+     * Counter to keep track of undo/redo
+     */
     private int counter;
 
+    /**
+     * Instantiates a new Text buffer.
+     *
+     * @param text the text
+     */
     public TextBuffer(String text) {
         this.states = new ArrayList<>();
         this.states.add(new StringBuilder(text));
@@ -25,9 +45,14 @@ public class TextBuffer implements TextBufferInterface {
     public void insert(int i, String str) {
         this.deleteStates();
         this.updateStateBuffer();
-        StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
-        this.states.add(newState.insert(i, str));
-        this.counter++;
+        try {
+            StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
+            this.states.add(newState.insert(i, str));
+            this.counter++;
+        }catch (StringIndexOutOfBoundsException e){
+            logger.info("Index out of bounds, please enter a valid index");
+        }
+
     }
 
     @Override
@@ -48,8 +73,8 @@ public class TextBuffer implements TextBufferInterface {
         try {
             this.states.add(newState.delete(i, i + n));
             this.counter++;
-        }catch (Exception e){
-            logger.info(e.getMessage());
+        }catch (StringIndexOutOfBoundsException e){
+            logger.info("Index out of bounds, please enter a valid index");
         }
 
     }
@@ -59,9 +84,14 @@ public class TextBuffer implements TextBufferInterface {
         this.deleteStates();
         this.updateStateBuffer();
         int l = this.states.get(counter).length();
-        StringBuilder newState = new StringBuilder(this.states.get(counter).substring(0, l - n));
-        this.states.add(newState);
-        this.counter++;
+        try {
+            StringBuilder newState = new StringBuilder(this.states.get(counter).substring(0, l - n));
+            this.states.add(newState);
+            this.counter++;
+        }
+        catch (StringIndexOutOfBoundsException e){
+            logger.info("Index out of bounds, please enter a valid index");
+        }
     }
 
     @Override
@@ -115,6 +145,10 @@ public class TextBuffer implements TextBufferInterface {
         }
     }
 
+    /**
+     * Helper method to invalidate old operations
+     * when an operation is performed after an undo
+     */
     private void deleteStates() {
 
         if (this.states.size() > this.counter + 1) {
@@ -122,6 +156,9 @@ public class TextBuffer implements TextBufferInterface {
         }
     }
 
+    /**
+     * Helper method to update the buffer when the max size was reached.
+     */
     private void updateStateBuffer() {
         if (this.states.size() == BUFFER_SIZE) {
             this.counter--;
