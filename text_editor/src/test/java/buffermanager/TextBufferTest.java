@@ -5,17 +5,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TextBufferTest {
 
     TextBuffer textBuffer;
+    private String HELLO= "hello";
+    private String WORLD= "world";
 
     @BeforeEach
     void setup() {
-        textBuffer = new TextBuffer("hello");
+        textBuffer = new TextBuffer(HELLO);
     }
 
     @AfterEach
@@ -25,26 +31,26 @@ public class TextBufferTest {
 
     @Test
     void basicTest() {
-        assertEquals("hello", textBuffer.toString());
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     @Test
     void appendTest() {
-        textBuffer.append("world");
+        textBuffer.append(WORLD);
         assertEquals("helloworld", textBuffer.toString());
     }
 
     @Test
     void insertTest() {
-        textBuffer.insert(3,"world");
+        textBuffer.insert(3,WORLD);
         assertEquals("helworldlo",textBuffer.toString());
     }
 
     @Test
     void undoTest(){
-        textBuffer.append("world");
+        textBuffer.append(WORLD);
         textBuffer.undo();
-        assertEquals("hello",textBuffer.toString());
+        assertEquals(HELLO,textBuffer.toString());
     }
 
     @Test
@@ -63,19 +69,53 @@ public class TextBufferTest {
     }
 
     @Test
-    void redoTest(){
+    void limitedBufferSizeTest(){
         textBuffer.append(" ");
         textBuffer.append("everyone");
         textBuffer.append(" on this planet");
+        textBuffer.replace(HELLO, "Bye");
+        textBuffer.append(".");
         textBuffer.undo();
         textBuffer.undo();
-        textBuffer.redo();
-        assertEquals("hello everyone",textBuffer.toString());
+        textBuffer.undo();
+        textBuffer.undo();
+        textBuffer.undo();
+        textBuffer.undo();
+        textBuffer.undo();
+        assertEquals("hello ",textBuffer.toString());
     }
 
     @Test
-    void exceptionTest(){
-        assertThrows(StringIndexOutOfBoundsException.class, () ->
-                textBuffer.erase(2,7));
+    void redoTest(){
+        textBuffer.append(WORLD);
+        textBuffer.undo();
+        textBuffer.redo();
+        assertEquals("helloworld",textBuffer.toString());
     }
+
+    @Test
+    void loadFileTest(){
+        textBuffer.append(". ");
+        textBuffer.loadFile("src/test/testfile.txt");
+        assertEquals("hello. Hi, this is a test file.",textBuffer.toString());
+    }
+
+    @Test
+    void saveFileTest(){
+        textBuffer.append(". This is a test to save a file");
+        textBuffer.saveFile("src/test/savefile.txt");
+        File file = new File("src/test/savefile.txt");
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            StringBuilder builder = new StringBuilder();
+            String string;
+            while ((string = br.readLine()) != null) {
+                builder.append(string);
+            }
+            assertEquals(builder.toString(),textBuffer.toString());
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
+
 }
