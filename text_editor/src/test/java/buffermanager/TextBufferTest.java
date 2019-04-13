@@ -9,41 +9,65 @@ import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * The type Text buffer test.
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TextBufferTest {
 
 
+    /**
+     * The Text buffer.
+     */
     TextBuffer textBuffer;
     private String HELLO= "hello";
     private String WORLD= "world";
 
+    /**
+     * Sets .
+     */
     @BeforeEach
     void setup() {
         textBuffer = new TextBuffer(HELLO);
     }
 
+    /**
+     * Clean.
+     */
     @AfterEach
     void clean(){
         textBuffer= null;
     }
 
+    /**
+     * Basic test.
+     */
     @Test
     void basicTest() {
         assertEquals(HELLO, textBuffer.toString());
     }
 
+    /**
+     * Append test.
+     */
     @Test
     void appendTest() {
         textBuffer.append(WORLD);
         assertEquals("helloworld", textBuffer.toString());
     }
 
+    /**
+     * Insert test.
+     */
     @Test
     void insertTest() {
         textBuffer.insert(3,WORLD);
         assertEquals("helworldlo",textBuffer.toString());
     }
 
+    /**
+     * Undo test.
+     */
     @Test
     void undoTest(){
         textBuffer.append(WORLD);
@@ -51,6 +75,9 @@ public class TextBufferTest {
         assertEquals(HELLO,textBuffer.toString());
     }
 
+    /**
+     * Erase test.
+     */
     @Test
     void eraseTest(){
         textBuffer.append(" ");
@@ -60,12 +87,18 @@ public class TextBufferTest {
         assertEquals("helloevery",textBuffer.toString());
     }
 
+    /**
+     * Erase trailing test.
+     */
     @Test
     void eraseTrailingTest(){
         textBuffer.eraseTrailing(2);
         assertEquals("hel",textBuffer.toString());
     }
 
+    /**
+     * Limited buffer size test.
+     */
     @Test
     void limitedBufferSizeTest(){
         textBuffer.append(" ");
@@ -83,6 +116,9 @@ public class TextBufferTest {
         assertEquals("hello ",textBuffer.toString());
     }
 
+    /**
+     * Redo test.
+     */
     @Test
     void redoTest(){
         textBuffer.append(WORLD);
@@ -91,6 +127,9 @@ public class TextBufferTest {
         assertEquals("helloworld",textBuffer.toString());
     }
 
+    /**
+     * Load file test.
+     */
     @Test
     void loadFileTest(){
         textBuffer.append(". ");
@@ -98,6 +137,9 @@ public class TextBufferTest {
         assertEquals("hello. Hi, this is a test file.",textBuffer.toString());
     }
 
+    /**
+     * Save file test.
+     */
     @Test
     void saveFileTest(){
         textBuffer.append(". This is a test to save a file");
