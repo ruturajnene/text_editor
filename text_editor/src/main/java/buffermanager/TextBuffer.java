@@ -30,6 +30,8 @@ public class TextBuffer implements TextBufferInterface {
      */
     private int counter;
 
+    private static final String ERROR_MESSAGE="Index out of bounds, please enter a valid index";
+
     /**
      * Instantiates a new Text buffer.
      *
@@ -50,7 +52,7 @@ public class TextBuffer implements TextBufferInterface {
             this.states.add(newState.insert(i, str));
             this.counter++;
         }catch (StringIndexOutOfBoundsException e){
-            logger.info("Index out of bounds, please enter a valid index");
+            logger.info(ERROR_MESSAGE);
         }
 
     }
@@ -74,7 +76,7 @@ public class TextBuffer implements TextBufferInterface {
             this.states.add(newState.delete(i, i + n));
             this.counter++;
         }catch (StringIndexOutOfBoundsException e){
-            logger.info("Index out of bounds, please enter a valid index");
+            logger.info(ERROR_MESSAGE);
         }
 
     }
@@ -89,8 +91,8 @@ public class TextBuffer implements TextBufferInterface {
             this.states.add(newState);
             this.counter++;
         }
-        catch (StringIndexOutOfBoundsException e){
-            logger.info("Index out of bounds, please enter a valid index");
+        catch (Exception e){
+            logger.info("Please enter value less than the number of characters present");
         }
     }
 
@@ -105,7 +107,7 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void redo() {
-        if (this.counter < states.size()) {
+        if (this.counter < states.size()-1) {
             this.counter++;
         }
     }

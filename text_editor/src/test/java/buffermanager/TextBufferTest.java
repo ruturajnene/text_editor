@@ -157,4 +157,27 @@ public class TextBufferTest {
         }
     }
 
+    @Test
+    void insertBoundaryTest(){
+        textBuffer.insert(9," everyone");
+        assertEquals(HELLO,textBuffer.toString());
+    }
+
+    @Test
+    void eraseExceptionTest(){
+        textBuffer.erase(Integer.MAX_VALUE,5);
+        assertEquals(HELLO,textBuffer.toString());
+    }
+
+    @Test
+    void redoExceptionTest(){
+        textBuffer.redo();
+        assertEquals(HELLO,textBuffer.toString());
+    }
+
+    @Test
+    void eraseTrailingExceptionTest(){
+        textBuffer.eraseTrailing(6);
+        assertEquals(HELLO,textBuffer.toString());
+    }
 }
