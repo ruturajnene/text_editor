@@ -1,10 +1,17 @@
 package buffermanager;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class TextBuffer implements TextBufferInterface {
 
+    private static final int BUFFER_SIZE = 5;
+    private Logger logger = Logger.getLogger(this.getClass().getName());
     private List<StringBuilder> states;
     private int counter;
 
@@ -17,6 +24,7 @@ public class TextBuffer implements TextBufferInterface {
     @Override
     public void insert(int i, String str) {
         this.deleteStates();
+        this.updateStateBuffer();
         StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
         this.states.add(newState.insert(i, str));
         this.counter++;
@@ -25,6 +33,7 @@ public class TextBuffer implements TextBufferInterface {
     @Override
     public void append(String string) {
         this.deleteStates();
+        this.updateStateBuffer();
         StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
         this.states.add(newState.append(string));
         this.counter++;
@@ -33,16 +42,22 @@ public class TextBuffer implements TextBufferInterface {
     @Override
     public void erase(int n, int i) {
         this.deleteStates();
+        this.updateStateBuffer();
         StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
 
-        this.states.add(newState.delete(i, i + n));
-        this.counter++;
+        try {
+            this.states.add(newState.delete(i, i + n));
+            this.counter++;
+        }catch (Exception e){
+            logger.info(e.getMessage());
+        }
 
     }
 
     @Override
     public void eraseTrailing(int n) {
         this.deleteStates();
+        this.updateStateBuffer();
         int l = this.states.get(counter).length();
         StringBuilder newState = new StringBuilder(this.states.get(counter).substring(0, l - n));
         this.states.add(newState);
@@ -52,6 +67,7 @@ public class TextBuffer implements TextBufferInterface {
     @Override
     public void replace(String oldString, String newString) {
         this.deleteStates();
+        this.updateStateBuffer();
         String newState = this.states.get(counter).toString().replaceAll(oldString, newString);
         this.states.add(new StringBuilder(newState));
         this.counter++;
@@ -73,18 +89,43 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void loadFile(String path) {
-        // implement later
+        this.deleteStates();
+        this.updateStateBuffer();
+        File file = new File(path);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            StringBuilder newState = new StringBuilder(this.states.get(this.counter));
+            String string;
+            while ((string = br.readLine()) != null) {
+                newState.append(string);
+            }
+            this.states.add(newState);
+            this.counter++;
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        }
     }
 
     @Override
     public void saveFile(String path) {
-        // implement later
+        String content = this.states.get(this.counter).toString();
+        try {
+            Files.write(Paths.get(path), content.getBytes(), StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        }
     }
 
     private void deleteStates() {
 
         if (this.states.size() > this.counter + 1) {
             this.states.subList(this.counter + 1, this.states.size()).clear();
+        }
+    }
+
+    private void updateStateBuffer() {
+        if (this.states.size() == BUFFER_SIZE) {
+            this.counter--;
+            this.states.remove(0);
         }
     }
 
