@@ -83,7 +83,7 @@ public class TextBufferTest {
         textBuffer.append(" ");
         textBuffer.undo();
         textBuffer.append("everyone");
-        textBuffer.erase(3,10);
+        textBuffer.erase(10,3);
         assertEquals("helloevery",textBuffer.toString());
     }
 
@@ -101,11 +101,12 @@ public class TextBufferTest {
      */
     @Test
     void limitedBufferSizeTest(){
+        textBuffer.replace(HELLO, "Bye");
         textBuffer.append(" ");
         textBuffer.append("everyone");
         textBuffer.append(" on this planet");
-        textBuffer.replace(HELLO, "Bye");
         textBuffer.append(".");
+        textBuffer.eraseTrailing(4);
         textBuffer.undo();
         textBuffer.undo();
         textBuffer.undo();
@@ -113,7 +114,7 @@ public class TextBufferTest {
         textBuffer.undo();
         textBuffer.undo();
         textBuffer.undo();
-        assertEquals("hello ",textBuffer.toString());
+        assertEquals("Bye",textBuffer.toString());
     }
 
     /**
@@ -134,7 +135,7 @@ public class TextBufferTest {
     void loadFileTest(){
         textBuffer.append(". ");
         textBuffer.loadFile("src/test/testfile.txt");
-        assertEquals("hello. Hi, this is a test file.",textBuffer.toString());
+        assertEquals("Hi, this is a test file.",textBuffer.toString());
     }
 
     /**
@@ -165,7 +166,7 @@ public class TextBufferTest {
 
     @Test
     void eraseExceptionTest(){
-        textBuffer.erase(Integer.MAX_VALUE,5);
+        textBuffer.erase(5,Integer.MAX_VALUE);
         assertEquals(HELLO,textBuffer.toString());
     }
 
@@ -179,5 +180,13 @@ public class TextBufferTest {
     void eraseTrailingExceptionTest(){
         textBuffer.eraseTrailing(6);
         assertEquals(HELLO,textBuffer.toString());
+    }
+
+    @Test
+    void replaceMultipleTest(){
+        textBuffer.append(" ");
+        textBuffer.append(HELLO);
+        textBuffer.replace(HELLO, "bye");
+        assertEquals("bye bye",textBuffer.toString());
     }
 }

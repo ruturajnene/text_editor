@@ -24,13 +24,16 @@ public class TextBuffer implements TextBufferInterface {
     /**
      * The list of the states of the text buffer
      */
-    private List<StringBuilder> states;
+    private List<Operation> states;
     /**
      * Counter to keep track of undo/redo
      */
     private int counter;
 
-    private static final String ERROR_MESSAGE="Index out of bounds, please enter a valid index";
+    /**
+     * The initial text state of the buffer
+     */
+    private String text;
 
     /**
      * Instantiates a new Text buffer.
@@ -39,69 +42,47 @@ public class TextBuffer implements TextBufferInterface {
      */
     public TextBuffer(String text) {
         this.states = new ArrayList<>();
-        this.states.add(new StringBuilder(text));
-        this.counter = 0;
+        this.counter = -1;
+        this.text=text;
     }
 
     @Override
     public void insert(int i, String str) {
         this.deleteStates();
         this.updateStateBuffer();
-        try {
-            StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
-            this.states.add(newState.insert(i, str));
-            this.counter++;
-        }catch (StringIndexOutOfBoundsException e){
-            logger.info(ERROR_MESSAGE);
-        }
-
+        this.states.add(new InsertOperation(i,str));
+        this.counter++;
     }
 
     @Override
     public void append(String string) {
         this.deleteStates();
         this.updateStateBuffer();
-        StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
-        this.states.add(newState.append(string));
+        this.states.add(new InsertOperation(-1,string));
         this.counter++;
     }
 
     @Override
-    public void erase(int n, int i) {
+    public void erase(int i, int n) {
         this.deleteStates();
         this.updateStateBuffer();
-        StringBuilder newState = new StringBuilder(this.states.get(counter).toString());
-
-        try {
-            this.states.add(newState.delete(i, i + n));
-            this.counter++;
-        }catch (StringIndexOutOfBoundsException e){
-            logger.info(ERROR_MESSAGE);
-        }
-
+        this.states.add(new EraseOperation(i,n));
+        this.counter++;
     }
 
     @Override
     public void eraseTrailing(int n) {
         this.deleteStates();
         this.updateStateBuffer();
-        int l = this.states.get(counter).length();
-        try {
-            StringBuilder newState = new StringBuilder(this.states.get(counter).substring(0, l - n));
-            this.states.add(newState);
-            this.counter++;
-        }
-        catch (Exception e){
-            logger.info("Please enter value less than the number of characters present");
-        }
+        this.states.add(new EraseOperation(-1,n));
+        this.counter++;
     }
 
     @Override
     public void replace(String oldString, String newString) {
         this.deleteStates();
         this.updateStateBuffer();
-        String newState = this.states.get(counter).toString().replaceAll(oldString, newString);
-        this.states.add(new StringBuilder(newState));
+        this.states.add(new ReplaceOperation(oldString,newString));
         this.counter++;
     }
 
@@ -114,24 +95,23 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void undo() {
-        if (this.counter > 0) {
+        if (this.counter > -1) {
             this.counter--;
         }
     }
 
     @Override
     public void loadFile(String path) {
-        this.deleteStates();
-        this.updateStateBuffer();
         File file = new File(path);
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            StringBuilder newState = new StringBuilder(this.states.get(this.counter));
+            StringBuilder newState = new StringBuilder();
             String string;
             while ((string = br.readLine()) != null) {
                 newState.append(string);
             }
-            this.states.add(newState);
-            this.counter++;
+            this.text=newState.toString();
+            this.states= new ArrayList<>();
+            this.counter=-1;
         } catch (IOException e) {
             logger.info(e.getMessage());
         }
@@ -139,7 +119,7 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void saveFile(String path) {
-        String content = this.states.get(this.counter).toString();
+        String content = this.toString();
         try {
             Files.write(Paths.get(path), content.getBytes(), StandardOpenOption.CREATE);
         } catch (IOException e) {
@@ -164,12 +144,23 @@ public class TextBuffer implements TextBufferInterface {
     private void updateStateBuffer() {
         if (this.states.size() == BUFFER_SIZE) {
             this.counter--;
+            StringBuilder initialState= new StringBuilder(text);
+            this.states.get(0).execute(initialState);
+            this.text=initialState.toString();
             this.states.remove(0);
         }
     }
 
     @Override
     public String toString() {
-        return this.states.get(this.counter).toString();
+        if(this.counter!=-1){
+            StringBuilder state= new StringBuilder(this.text);
+            for (int i=0; i<=counter; i++) {
+                this.states.get(i).execute(state);
+            }
+            return state.toString();
+        }
+        else
+            return this.text;
     }
 }
