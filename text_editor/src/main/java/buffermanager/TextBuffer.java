@@ -56,10 +56,7 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void append(String string) {
-        this.deleteStates();
-        this.updateStateBuffer();
-        this.states.add(new InsertOperation(-1,string));
-        this.counter++;
+        this.insert(-1,string);
     }
 
     @Override
@@ -72,10 +69,7 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public void eraseTrailing(int n) {
-        this.deleteStates();
-        this.updateStateBuffer();
-        this.states.add(new EraseOperation(-1,n));
-        this.counter++;
+        this.erase(-1,n);
     }
 
     @Override
