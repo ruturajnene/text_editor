@@ -23,11 +23,11 @@ public interface TextBufferInterface {
     /**
      * Erase n characters at the given index i.
      *
-     * @param n the number of characters
      * @param i the index
+     * @param n the number of characters
      */
-    void erase(int n, int i);
-
+    void erase(int i, int n);
+    
     /**
      * Erase n trailing characters.
      *
