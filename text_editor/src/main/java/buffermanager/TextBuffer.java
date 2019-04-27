@@ -34,6 +34,13 @@ public class TextBuffer implements TextBufferInterface {
      */
     private String text;
 
+    private boolean toggle;
+
+    /**
+     * The current text state of the buffer
+     */
+    private String currentText;
+
     /**
      * Instantiates a new Text buffer.
      *
@@ -42,46 +49,55 @@ public class TextBuffer implements TextBufferInterface {
     public TextBuffer(String text) {
         this.states = new LinkedList<>();
         this.counter = -1;
-        this.text=text;
+        this.text = text;
+        this.toggle = false;
+        this.currentText = text;
     }
 
     @Override
     public void insert(int i, String str) {
         this.deleteStates();
         this.updateStateBuffer();
-        this.states.add(new InsertOperation(i,str));
+        Operation op = new InsertOperation(i, str);
+        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.states.add(op);
         this.counter++;
     }
 
     @Override
     public void append(String string) {
-        this.insert(-1,string);
+        this.insert(-1, string);
     }
 
     @Override
     public void erase(int i, int n) {
         this.deleteStates();
         this.updateStateBuffer();
-        this.states.add(new EraseOperation(i,n));
+        Operation op = new EraseOperation(i, n);
+        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.states.add(op);
         this.counter++;
     }
 
     @Override
     public void eraseTrailing(int n) {
-        this.erase(-1,n);
+        this.erase(-1, n);
     }
 
     @Override
     public void replace(String oldString, String newString) {
         this.deleteStates();
         this.updateStateBuffer();
-        this.states.add(new ReplaceOperation(oldString,newString));
+        Operation op = new ReplaceOperation(oldString, newString);
+        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.states.add(op);
         this.counter++;
     }
 
     @Override
     public void redo() {
-        if (this.counter < states.size()-1) {
+        if (this.counter < states.size() - 1) {
+            this.toggle = true;
             this.counter++;
         }
     }
@@ -89,6 +105,7 @@ public class TextBuffer implements TextBufferInterface {
     @Override
     public void undo() {
         if (this.counter > -1) {
+            this.toggle = true;
             this.counter--;
         }
     }
@@ -102,9 +119,11 @@ public class TextBuffer implements TextBufferInterface {
             while ((string = br.readLine()) != null) {
                 newState.append(string);
             }
-            this.text=newState.toString();
-            this.states= new LinkedList<>();
-            this.counter=-1;
+            this.text = newState.toString();
+            this.currentText = this.text;
+            this.states = new LinkedList<>();
+            this.counter = -1;
+            this.toggle = false;
         } catch (IOException e) {
             logger.info(e.getMessage());
         }
@@ -126,7 +145,7 @@ public class TextBuffer implements TextBufferInterface {
      */
     private void deleteStates() {
 
-        while(this.states.size()>this.counter+1){
+        while (this.states.size() > this.counter + 1) {
             this.states.removeLast();
         }
     }
@@ -137,26 +156,29 @@ public class TextBuffer implements TextBufferInterface {
     private void updateStateBuffer() {
         if (this.states.size() == BUFFER_SIZE) {
             this.counter--;
-            StringBuilder initialState= new StringBuilder(text);
+            StringBuilder initialState = new StringBuilder(text);
             this.states.pop().execute(initialState);
-            this.text=initialState.toString();
+            this.text = initialState.toString();
         }
     }
 
     @Override
     public String toString() {
 
-        if(this.counter!=-1){
+        if (this.counter == -1) {
+            return this.text;
+        }
+        if (this.toggle) {
 
-            int index=0;
-            StringBuilder state= new StringBuilder(this.text);
+            int index = 0;
+            StringBuilder state = new StringBuilder(this.text);
             Iterator<Operation> iterator = this.states.iterator();
-            while(iterator.hasNext() && index<=this.counter+1){
+            while (iterator.hasNext() && index <= this.counter + 1) {
                 iterator.next().execute(state);
             }
-            return state.toString();
+            this.toggle = false;
+            this.currentText = state.toString();
         }
-        else
-            return this.text;
+        return this.currentText;
     }
 }
