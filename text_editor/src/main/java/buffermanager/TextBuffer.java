@@ -4,8 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +23,7 @@ public class TextBuffer implements TextBufferInterface {
     /**
      * The list of the states of the text buffer
      */
-    private List<Operation> states;
+    private Deque<Operation> states;
     /**
      * Counter to keep track of undo/redo
      */
@@ -41,7 +40,7 @@ public class TextBuffer implements TextBufferInterface {
      * @param text the text
      */
     public TextBuffer(String text) {
-        this.states = new ArrayList<>();
+        this.states = new LinkedList<>();
         this.counter = -1;
         this.text=text;
     }
@@ -104,7 +103,7 @@ public class TextBuffer implements TextBufferInterface {
                 newState.append(string);
             }
             this.text=newState.toString();
-            this.states= new ArrayList<>();
+            this.states= new LinkedList<>();
             this.counter=-1;
         } catch (IOException e) {
             logger.info(e.getMessage());
@@ -127,8 +126,8 @@ public class TextBuffer implements TextBufferInterface {
      */
     private void deleteStates() {
 
-        if (this.states.size() > this.counter + 1) {
-            this.states.subList(this.counter + 1, this.states.size()).clear();
+        while(this.states.size()>this.counter+1){
+            this.states.removeLast();
         }
     }
 
@@ -139,18 +138,21 @@ public class TextBuffer implements TextBufferInterface {
         if (this.states.size() == BUFFER_SIZE) {
             this.counter--;
             StringBuilder initialState= new StringBuilder(text);
-            this.states.get(0).execute(initialState);
+            this.states.pop().execute(initialState);
             this.text=initialState.toString();
-            this.states.remove(0);
         }
     }
 
     @Override
     public String toString() {
+
         if(this.counter!=-1){
+
+            int index=0;
             StringBuilder state= new StringBuilder(this.text);
-            for (int i=0; i<=counter; i++) {
-                this.states.get(i).execute(state);
+            Iterator<Operation> iterator = this.states.iterator();
+            while(iterator.hasNext() && index<=this.counter+1){
+                iterator.next().execute(state);
             }
             return state.toString();
         }
