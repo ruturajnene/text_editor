@@ -31,7 +31,7 @@ public class EraseOperation implements Operation {
         this.characters=characters;
     }
     @Override
-    public void execute(StringBuilder buffer) {
+    public StringBuilder execute(StringBuilder buffer) {
         try {
             if (position != -1) {
                 buffer.delete(position, position + characters);
@@ -42,5 +42,6 @@ public class EraseOperation implements Operation {
         }catch (Exception e){
             logger.info("Please enter value less than the number of characters present");
         }
+        return buffer;
     }
 }
