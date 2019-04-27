@@ -10,5 +10,5 @@ public interface Operation {
      *
      * @param buffer the buffer
      */
-    void execute(StringBuilder buffer);
+    StringBuilder execute(StringBuilder buffer);
 }
