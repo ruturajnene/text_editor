@@ -26,12 +26,13 @@ public class ReplaceOperation implements Operation {
         this.text=text;
     }
     @Override
-    public void execute(StringBuilder buffer) {
+    public StringBuilder execute(StringBuilder buffer) {
         int i =buffer.indexOf(old);
         int len=old.length();
         while(i!=-1){
             buffer.replace(i,i+len,text);
             i=buffer.indexOf(old);
         }
+        return buffer;
     }
 }
