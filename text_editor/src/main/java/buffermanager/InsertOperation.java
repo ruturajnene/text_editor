@@ -33,7 +33,7 @@ public class InsertOperation implements Operation{
     }
 
     @Override
-    public void execute(StringBuilder buffer) {
+    public StringBuilder execute(StringBuilder buffer) {
         if(position!=-1) {
             try {
                 buffer.insert(position, text);
@@ -44,5 +44,7 @@ public class InsertOperation implements Operation{
         else{
             buffer.append(text);
         }
+
+        return buffer;
     }
 }
