@@ -15,6 +15,11 @@ public class EraseOperation implements Operation {
      * The number of characters to be erased
      */
     private int characters;
+
+    /**
+     * The characters deleted as a result of the operation
+     */
+    private String deletedCharacters="";
     /**
      * Logger to log any error, info
      */
@@ -34,14 +39,31 @@ public class EraseOperation implements Operation {
     public StringBuilder execute(StringBuilder buffer) {
         try {
             if (position != -1) {
+                deletedCharacters=buffer.substring(position, position + characters);
                 buffer.delete(position, position + characters);
             } else {
                 int l = buffer.length();
+                deletedCharacters=buffer.substring(l - characters, l);
                 buffer.delete(l - characters, l);
             }
         }catch (Exception e){
             logger.info("Please enter value less than the number of characters present");
         }
+        return buffer;
+    }
+
+    @Override
+    public StringBuilder undo(StringBuilder buffer) {
+        try {
+            if (position != -1) {
+                buffer.insert(position, deletedCharacters);
+            } else {
+                buffer.append(deletedCharacters);
+            }
+        }catch (Exception e){
+            logger.info("Please enter value less than the number of characters present");
+        }
+
         return buffer;
     }
 }
