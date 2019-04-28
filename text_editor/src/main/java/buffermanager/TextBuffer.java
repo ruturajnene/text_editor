@@ -34,7 +34,7 @@ public class TextBuffer implements TextBufferInterface {
     /**
      * The current text state of the buffer
      */
-    private String currentText;
+    private StringBuilder currentText;
 
 
     /**
@@ -45,7 +45,7 @@ public class TextBuffer implements TextBufferInterface {
     TextBuffer(String text) {
         this.states = new LinkedList<>();
         this.operationStack = new LinkedList<>();
-        this.currentText = text;
+        this.currentText = new StringBuilder(text);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TextBuffer implements TextBufferInterface {
         this.deleteStates();
         this.updateStateBuffer();
         Operation op = new InsertOperation(i, str);
-        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.currentText = op.execute(this.currentText);
         this.states.add(op);
     }
 
@@ -67,7 +67,7 @@ public class TextBuffer implements TextBufferInterface {
         this.deleteStates();
         this.updateStateBuffer();
         Operation op = new EraseOperation(i, n);
-        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.currentText = op.execute(this.currentText);
         this.states.add(op);
     }
 
@@ -81,7 +81,7 @@ public class TextBuffer implements TextBufferInterface {
         this.deleteStates();
         this.updateStateBuffer();
         Operation op = new ReplaceOperation(oldString, newString);
-        this.currentText = op.execute(new StringBuilder(this.currentText)).toString();
+        this.currentText = op.execute(this.currentText);
         this.states.add(op);
     }
 
@@ -89,7 +89,7 @@ public class TextBuffer implements TextBufferInterface {
     public void redo() {
         if (!this.operationStack.isEmpty()) {
             Operation operation = this.operationStack.pollLast();
-            this.currentText = operation.execute(new StringBuilder(this.currentText)).toString();
+            this.currentText = operation.execute(this.currentText);
             this.operationStack.add(operation);
         }
     }
@@ -98,7 +98,7 @@ public class TextBuffer implements TextBufferInterface {
     public void undo() {
         if (!this.states.isEmpty()) {
             Operation operation = this.states.pollLast();
-            this.currentText = operation.undo(new StringBuilder(this.currentText)).toString();
+            this.currentText = operation.undo(this.currentText);
             this.operationStack.add(operation);
         }
     }
@@ -112,7 +112,7 @@ public class TextBuffer implements TextBufferInterface {
             while ((string = br.readLine()) != null) {
                 newState.append(string);
             }
-            this.currentText = newState.toString();
+            this.currentText = newState;
             this.states = new LinkedList<>();
             this.operationStack = new LinkedList<>();
         } catch (IOException e) {
@@ -149,6 +149,6 @@ public class TextBuffer implements TextBufferInterface {
 
     @Override
     public String toString() {
-        return this.currentText;
+        return this.currentText.toString();
     }
 }
