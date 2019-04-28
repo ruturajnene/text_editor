@@ -20,8 +20,8 @@ public class TextBufferTest {
      * The Text buffer.
      */
     TextBuffer textBuffer;
-    private String HELLO= "hello";
-    private String WORLD= "world";
+    private String HELLO = "hello";
+    private String WORLD = "world";
 
     /**
      * Sets .
@@ -35,8 +35,8 @@ public class TextBufferTest {
      * Clean.
      */
     @AfterEach
-    void clean(){
-        textBuffer= null;
+    void clean() {
+        textBuffer = null;
     }
 
     /**
@@ -61,46 +61,46 @@ public class TextBufferTest {
      */
     @Test
     void insertTest() {
-        textBuffer.insert(3,WORLD);
-        assertEquals("helworldlo",textBuffer.toString());
+        textBuffer.insert(3, WORLD);
+        assertEquals("helworldlo", textBuffer.toString());
     }
 
     /**
      * Undo test.
      */
     @Test
-    void undoTest(){
+    void undoTest() {
         textBuffer.append(WORLD);
         textBuffer.undo();
-        assertEquals(HELLO,textBuffer.toString());
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     /**
      * Erase test.
      */
     @Test
-    void eraseTest(){
+    void eraseTest() {
         textBuffer.append(" ");
         textBuffer.undo();
         textBuffer.append("everyone");
-        textBuffer.erase(10,3);
-        assertEquals("helloevery",textBuffer.toString());
+        textBuffer.erase(10, 3);
+        assertEquals("helloevery", textBuffer.toString());
     }
 
     /**
      * Erase trailing test.
      */
     @Test
-    void eraseTrailingTest(){
+    void eraseTrailingTest() {
         textBuffer.eraseTrailing(2);
-        assertEquals("hel",textBuffer.toString());
+        assertEquals("hel", textBuffer.toString());
     }
 
     /**
      * Limited buffer size test.
      */
     @Test
-    void limitedBufferSizeTest(){
+    void limitedBufferSizeTest() {
         textBuffer.replace(HELLO, "Bye");
         textBuffer.append(" ");
         textBuffer.append("everyone");
@@ -114,35 +114,35 @@ public class TextBufferTest {
         textBuffer.undo();
         textBuffer.undo();
         textBuffer.undo();
-        assertEquals("Bye",textBuffer.toString());
+        assertEquals("Bye", textBuffer.toString());
     }
 
     /**
      * Redo test.
      */
     @Test
-    void redoTest(){
+    void redoTest() {
         textBuffer.append(WORLD);
         textBuffer.undo();
         textBuffer.redo();
-        assertEquals("helloworld",textBuffer.toString());
+        assertEquals("helloworld", textBuffer.toString());
     }
 
     /**
      * Load file test.
      */
     @Test
-    void loadFileTest(){
+    void loadFileTest() {
         textBuffer.append(". ");
         textBuffer.loadFile("src/test/testfile.txt");
-        assertEquals("Hi, this is a test file.",textBuffer.toString());
+        assertEquals("Hi, this is a test file.", textBuffer.toString());
     }
 
     /**
      * Save file test.
      */
     @Test
-    void saveFileTest(){
+    void saveFileTest() {
         textBuffer.append(". This is a test to save a file");
         textBuffer.saveFile("src/test/savefile.txt");
         File file = new File("src/test/savefile.txt");
@@ -152,41 +152,50 @@ public class TextBufferTest {
             while ((string = br.readLine()) != null) {
                 builder.append(string);
             }
-            assertEquals(builder.toString(),textBuffer.toString());
+            assertEquals(builder.toString(), textBuffer.toString());
         } catch (IOException e) {
             fail();
         }
     }
 
     @Test
-    void insertBoundaryTest(){
-        textBuffer.insert(9," everyone");
-        assertEquals(HELLO,textBuffer.toString());
+    void insertBoundaryTest() {
+        textBuffer.insert(9, " everyone");
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     @Test
-    void eraseExceptionTest(){
-        textBuffer.erase(5,Integer.MAX_VALUE);
-        assertEquals(HELLO,textBuffer.toString());
+    void eraseExceptionTest() {
+        textBuffer.erase(5, Integer.MAX_VALUE);
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     @Test
-    void redoExceptionTest(){
+    void redoExceptionTest() {
         textBuffer.redo();
-        assertEquals(HELLO,textBuffer.toString());
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     @Test
-    void eraseTrailingExceptionTest(){
+    void eraseTrailingExceptionTest() {
         textBuffer.eraseTrailing(6);
-        assertEquals(HELLO,textBuffer.toString());
+        assertEquals(HELLO, textBuffer.toString());
     }
 
     @Test
-    void replaceMultipleTest(){
+    void replaceMultipleTest() {
         textBuffer.append(" ");
         textBuffer.append(HELLO);
         textBuffer.replace(HELLO, "bye");
-        assertEquals("bye bye",textBuffer.toString());
+        assertEquals("bye bye", textBuffer.toString());
+    }
+
+    @Test
+    void replaceTest(){
+        textBuffer.replace(HELLO,"Bye");
+        textBuffer.append(" World");
+        textBuffer.undo();
+        textBuffer.undo();
+        assertEquals(HELLO, textBuffer.toString());
     }
 }
