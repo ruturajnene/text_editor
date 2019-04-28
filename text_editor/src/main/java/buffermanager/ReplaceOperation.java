@@ -35,4 +35,15 @@ public class ReplaceOperation implements Operation {
         }
         return buffer;
     }
+
+    @Override
+    public StringBuilder undo(StringBuilder buffer) {
+        int i =buffer.indexOf(text);
+        int len=text.length();
+        while(i!=-1){
+            buffer.replace(i,i+len,old);
+            i=buffer.indexOf(text);
+        }
+        return buffer;
+    }
 }
