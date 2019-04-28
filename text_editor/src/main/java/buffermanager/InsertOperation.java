@@ -47,4 +47,20 @@ public class InsertOperation implements Operation{
 
         return buffer;
     }
+
+    @Override
+    public StringBuilder undo(StringBuilder buffer) {
+        try {
+            int characters=text.length();
+            if (position != -1) {
+                buffer.delete(position, position + characters);
+            } else {
+                int l = buffer.length();
+                buffer.delete(l - characters, l);
+            }
+        }catch (Exception e){
+            logger.info("Please enter value less than the number of characters present");
+        }
+        return buffer;
+    }
 }
